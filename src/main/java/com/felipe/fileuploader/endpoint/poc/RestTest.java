@@ -8,13 +8,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+
 @Path("/TestService")
 public class RestTest {
 	
 	@GET
 	@Path("/tests")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Test> getTests() {
+	public Test getTests() {
 		Test test = new Test();
 		test.setId(1);
 		test.setName("Test");
@@ -27,6 +28,6 @@ public class RestTest {
 		tests.add(test);
 		tests.add(test2);
 		
-		return tests;
+		return test;
 	}
 }

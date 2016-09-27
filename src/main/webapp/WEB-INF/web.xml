@@ -7,17 +7,23 @@
 	<display-name>fileuploader</display-name>
 
 	<servlet>
-		<servlet-name>fileuploader</servlet-name>
-		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+		<servlet-name>upload</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
-			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>com.felipe.fileuploader.endpoint.poc</param-value>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>com.felipe.fileuploader.endpoint.upload</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.provider.classnames</param-name>
+			<param-value>org.glassfish.jersey.filter.LoggingFilter;  
+     org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
+	
 	<servlet-mapping>
-		<servlet-name>fileuploader</servlet-name>
+		<servlet-name>upload</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	
 </web-app>
