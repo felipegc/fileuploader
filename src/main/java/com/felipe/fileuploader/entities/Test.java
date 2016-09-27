@@ -1,6 +1,4 @@
-package com.felipe.fileuploader.endpoint.poc;
-
-import java.io.Serializable;
+package com.felipe.fileuploader.entities;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
