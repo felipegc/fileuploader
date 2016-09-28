@@ -8,6 +8,8 @@ import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -19,12 +21,14 @@ import com.felipe.fileuploader.util.AppConfiguration;
 public class FileUploadService {  
     @POST  
     @Path("/upload")  
-    @Consumes(MediaType.MULTIPART_FORM_DATA)  
-    public Response uploadFile(  
+    @Consumes(MediaType.MULTIPART_FORM_DATA) 
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response uploadFile(
+    		@FormDataParam("chunkId") String chunkId,
 			@FormDataParam("file") InputStream uploadedInputStream,  
             @FormDataParam("file") FormDataContentDisposition fileDetail) {  
             String fileLocation = AppConfiguration.get(
-                    "files.storage") + fileDetail.getFileName();  
+                    "files.storage") + fileDetail.getFileName() + chunkId;  
                     //saving file  
             try {  
                 FileOutputStream out = new FileOutputStream(new File(fileLocation));  

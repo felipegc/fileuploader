@@ -3,16 +3,16 @@ package com.felipe.fileuploader.entities;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Test {
+public class TestBean {
 
 	private static final long serialVersionUID = 1L;
 	private int id;
 	private String name;
 
-	public Test() {
+	public TestBean() {
 	}
 
-	public Test(int id, String name) {
+	public TestBean(int id, String name) {
 		this.id = id;
 		this.name = name;
 	}
