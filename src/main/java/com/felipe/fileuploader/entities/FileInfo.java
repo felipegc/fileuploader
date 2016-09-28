@@ -10,7 +10,7 @@ public class FileInfo extends Entity<String>{
 	private String url;
 	private String owner;
 	private String status;
-	private Integer numberChunks;
+	private Integer chunkNumber;
 	private Long initTimestamp;
 	private Long finalTimestamp;
 
@@ -60,12 +60,12 @@ public class FileInfo extends Entity<String>{
 		this.status = status;
 	}
 
-	public Integer getNumberChunks() {
-		return numberChunks;
+	public Integer getChunkNumber() {
+		return chunkNumber;
 	}
 
-	public void setNumberChunks(Integer numberChunks) {
-		this.numberChunks = numberChunks;
+	public void setChunkNumber(Integer chunkNumber) {
+		this.chunkNumber = chunkNumber;
 	}
 
 	public Long getInitTimestamp() {

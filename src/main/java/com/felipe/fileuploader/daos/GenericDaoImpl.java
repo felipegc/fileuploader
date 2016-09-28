@@ -12,7 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.InternalServerErrorException;
+
 import com.felipe.fileuploader.entities.Entity;
+import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
 
 public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
@@ -37,7 +40,8 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 			oos = new ObjectOutputStream(fout);
 			oos.writeObject(entity);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new InternalServerErrorException(AppConfiguration.get(
+					"error.entity_not_saved", entity.getClass()));
 		} finally {
 			if (oos != null) {
 				try {
@@ -63,9 +67,10 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 				entities.add((T) ois.readObject());
 			}
 		} catch (EOFException ignored) {
-
+			//end of file. That's fine. Keep going.
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			throw new InternalServerErrorException(AppConfiguration.get(
+					"error.entities_not_fetched"));
 		} finally {
 			if (fis != null) {
 				try {
@@ -95,7 +100,8 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 		} catch (EOFException ignored) {
 
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			throw new InternalServerErrorException(AppConfiguration.get(
+					"error.entity_not_fetched", id.toString()));
 		} finally {
 			if (fis != null) {
 				try {
