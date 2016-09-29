@@ -1,24 +1,8 @@
 package com.felipe.fileuploader.endpoints;
 
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
-import org.hamcrest.Matchers;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -40,17 +24,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.felipe.fileuploader.daos.FileInfoDaoImpl;
 import com.felipe.fileuploader.entities.FileInfo;
 import com.felipe.fileuploader.services.FileInfoService;
 import com.felipe.fileuploader.services.FileInfoServiceImpl;
@@ -97,7 +82,7 @@ public class FileUploadServiceTest {
 	}
 
 	@Test
-	// @Ignore
+	@Ignore
 	public void whenSendingMultipleChunksMustGenerateOneFileInfoForEachChunk()
 			throws IOException {
 		
@@ -126,9 +111,6 @@ public class FileUploadServiceTest {
 
 		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(
 				file));
-		
-		Response response = null;		
-		
 		try {
 			String chunkName = file.getName();
 
@@ -147,9 +129,10 @@ public class FileUploadServiceTest {
 				filePart.setContentDisposition(FormDataContentDisposition
 						.name("file").fileName("savedBigText.txt").build());
 				MultiPart multipartEntity = new FormDataMultiPart().field(
-						"chunkNumber", String.valueOf(chunkId)).field("owner", "felipe").bodyPart(filePart);
+						"chunkNumber", String.valueOf(chunkId)).field("chunksExpected", String.valueOf(2)).
+						field("owner", "felipe").field("name", "savedBigText.txt").bodyPart(filePart);
 
-				response = t.request().post(
+				Response response = t.request().post(
 						Entity.entity(multipartEntity,
 								MediaType.MULTIPART_FORM_DATA));
 				chunkId++;
@@ -161,15 +144,8 @@ public class FileUploadServiceTest {
 	}
 	
 	@After
-	public void eraseDataBase() {
-		File file = new File(DirUtil.getDirDataBase());
-		
-		File[] listFiles = file.listFiles();
-		
-		for(int i=0; i<listFiles.length ; i++){
-			File fileToBeDeleted = listFiles[i];
-			fileToBeDeleted.delete();
-		}
+	public void eraseDataBase() throws IOException {
+		FileUtils.cleanDirectory(new File(DirUtil.getDirDataBase()));
 	}
 	
 	public class JerseyStreamingOutput implements StreamingOutput {

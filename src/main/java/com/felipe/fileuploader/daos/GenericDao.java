@@ -10,4 +10,6 @@ public interface GenericDao<T, I extends Serializable> {
 	public List<T> findAll();
 
 	public T findById(I id);
+	
+	public String getDataBasePath();
 }

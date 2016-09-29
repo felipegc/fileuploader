@@ -114,5 +114,8 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 
 		return infos.get(id);
 	}
-
+	
+	public String getDataBasePath(){
+		return pathBaseName;
+	}
 }

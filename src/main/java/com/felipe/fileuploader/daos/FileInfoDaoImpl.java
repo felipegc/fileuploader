@@ -1,12 +1,64 @@
 package com.felipe.fileuploader.daos;
 
-import com.felipe.fileuploader.entities.FileInfo;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements FileInfoDao {
-	
+import javax.ws.rs.InternalServerErrorException;
+
+import com.felipe.fileuploader.entities.FileInfo;
+import com.felipe.fileuploader.util.AppConfiguration;
+
+public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
+		FileInfoDao {
+
 	public static final String DATA_BASE_FILE_NAME = "fileInfo.db";
-	
+
 	public FileInfoDaoImpl() {
 		super(DATA_BASE_FILE_NAME);
+	}
+
+	@Override
+	public List<FileInfo> findChunksInfoByOwnerName(String owner, String name) {
+		String id = owner + name;
+		Map<String, List<FileInfo>> infos = new HashMap<>();
+
+		FileInputStream fis = null;
+
+		try {
+			fis = new FileInputStream(getDataBasePath());
+			while (true) {
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				FileInfo objRead = (FileInfo) ois.readObject();
+
+				if (infos.get(objRead.getId()) == null) {
+					List<FileInfo> chunks = new LinkedList<>();
+					chunks.add(objRead);
+					infos.put(objRead.getId(), chunks);
+				} else {
+					infos.get(objRead.getId()).add(objRead);
+				}
+			}
+		} catch (EOFException ignored) {
+
+		} catch (IOException | ClassNotFoundException e) {
+			throw new InternalServerErrorException(AppConfiguration.get(
+					"error.entity_not_fetched", id.toString()));
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return infos.get(id);
 	}
 }

@@ -8,7 +8,9 @@ import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +73,26 @@ public class FileInfoServiceImplTest {
 				allOf(hasProperty("id", equalTo(id)),
 						hasProperty("owner", equalTo(owner)),
 						hasProperty("status", equalTo(expectedStatus.name()))));
+	}
+	
+	@Test
+	public void whenRetrievingAllInfoChunksByOwnerNameMustSucceed() {
+		String owner = "felipe";
+		String name = "test.txt";
+		String id = owner + name;
+		StatusUpload expectedStatus = StatusUpload.FINISHED;
+
+		service.save(generateFileInfo(id, owner,
+				new Date().getTime(), StatusUpload.PROGRESS));
+		service.save(generateFileInfo(id, owner,
+				new Date().getTime(), expectedStatus));
+
+		List<FileInfo> chunkInfos = service.retrieveAllInfoChunksByOwnerName(owner, name);
+
+		assertThat(chunkInfos, 
+		        Matchers.<FileInfo>hasItem(
+		            Matchers.hasProperty("id", Matchers.equalTo(id))));
+		assertThat(chunkInfos.size(), is(equalTo(2)));
 	}
 
 	private FileInfo generateFileInfo(String id, String owner,

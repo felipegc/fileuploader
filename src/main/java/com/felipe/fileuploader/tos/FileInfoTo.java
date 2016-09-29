@@ -1,27 +1,21 @@
-package com.felipe.fileuploader.entities;
+package com.felipe.fileuploader.tos;
 
+import javax.xml.bind.annotation.XmlRootElement;
 
-public class FileInfo extends Entity<String>{
-
+@XmlRootElement
+public class FileInfoTo implements To {
+	
 	private String id;
 	private String name;
-	private String url;
 	private String owner;
-	private String status;
 	private Integer chunkNumber;
-	private Long initTimestamp;
+	private String status;
 	private Long finalTimestamp;
 
-	public FileInfo() {
-
-	}
-	
-	@Override
 	public String getId() {
 		return id;
 	}
 
-	@Override
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -34,28 +28,12 @@ public class FileInfo extends Entity<String>{
 		this.name = name;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
 	public String getOwner() {
 		return owner;
 	}
 
 	public void setOwner(String owner) {
 		this.owner = owner;
-	}
-	
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
 	}
 
 	public Integer getChunkNumber() {
@@ -66,12 +44,12 @@ public class FileInfo extends Entity<String>{
 		this.chunkNumber = chunkNumber;
 	}
 
-	public Long getInitTimestamp() {
-		return initTimestamp;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setInitTimestamp(Long initTimestamp) {
-		this.initTimestamp = initTimestamp;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public Long getFinalTimestamp() {
@@ -81,4 +59,5 @@ public class FileInfo extends Entity<String>{
 	public void setFinalTimestamp(Long finalTimestamp) {
 		this.finalTimestamp = finalTimestamp;
 	}
+
 }
