@@ -1,9 +1,11 @@
 package com.felipe.fileuploader.daos;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +28,15 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 	@Override
 	public List<FileInfo> findChunksInfoByOwnerName(String owner, String name) {
 		String id = owner + name;
+		return listAllChunkInfoOrganizedById().get(id);
+	}
+	
+	@Override
+	public Map<String,List<FileInfo>> listAllChunkInfoOrganizedById(){
+		if (!new File(getDataBasePath()).exists()) {
+			return new HashMap<>();
+		}
+		
 		Map<String, List<FileInfo>> infos = new HashMap<>();
 
 		FileInputStream fis = null;
@@ -48,7 +59,7 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 
 		} catch (IOException | ClassNotFoundException e) {
 			throw new InternalServerErrorException(AppConfiguration.get(
-					"error.entity_not_fetched", id.toString()));
+					"error.internal_error_message"));
 		} finally {
 			if (fis != null) {
 				try {
@@ -59,6 +70,6 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 			}
 		}
 
-		return infos.get(id);
+		return infos;
 	}
 }

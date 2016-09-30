@@ -29,9 +29,10 @@ public class FileServiceImpl {
 			InputStream uploadedInputStream,
 			FormDataContentDisposition fileDetail) {
 
-		try {
+		Long initTimestamp = new Date().getTime();
+		Long finalTimestamp = null;
 
-			Long initTimestamp = new Date().getTime();
+		try {
 
 			validateUpload(chunkNumber, chunksExpected, owner, name,
 					uploadedInputStream);
@@ -52,18 +53,26 @@ public class FileServiceImpl {
 			out.flush();
 			out.close();
 
-			Long finalTimestamp = new Date().getTime();
+			finalTimestamp = new Date().getTime();
 
 			fileInfoService.saveFileInformation(owner, name, chunkNumber,
-					chunksExpected, initTimestamp, finalTimestamp);
+					chunksExpected, StatusUpload.PROGRESS, initTimestamp,
+					finalTimestamp);
 
 			return fileInfoService
 					.retrieveAllInfoChunksByOwnerName(owner, name);
 		} catch (FileNotFoundException ex) {
+			fileInfoService.saveFileInformation(owner, name, chunkNumber,
+					chunksExpected, StatusUpload.FAILED, initTimestamp,
+					new Date().getTime());
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.directory_not_found",
 					AppConfiguration.get("files.storage")));
+
 		} catch (IOException e) {
+			fileInfoService.saveFileInformation(owner, name, chunkNumber,
+					chunksExpected, StatusUpload.FAILED, initTimestamp,
+					new Date().getTime());
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.chunk_not_saved", chunkNumber, name));
 		}
@@ -74,8 +83,8 @@ public class FileServiceImpl {
 
 		validateMandatoryFields(chunkNumber, chunksExpected, owner, name,
 				uploadedInputStream);
-		validatePreviousChunk(owner, name);
-		validateSameOwnerName(owner, name, chunkNumber);
+		//validatePreviousChunk(owner, name);
+		//validateSameOwnerName(owner, name, chunkNumber);
 
 	}
 
@@ -115,8 +124,7 @@ public class FileServiceImpl {
 		FileInfo lastChunkSaved = fileInfoService.findLastDataSavedById(owner
 				+ name);
 		if (lastChunkSaved != null
-				&& !StatusUpload.PROGRESS.name().equals(
-						lastChunkSaved.getStatus())) {
+				&& !StatusUpload.PROGRESS.equals(lastChunkSaved.getStatus())) {
 			throw new BadRequestException(
 					AppConfiguration.get("bad.previous_chunk_problem"));
 		}

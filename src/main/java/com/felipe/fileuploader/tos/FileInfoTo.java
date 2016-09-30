@@ -2,15 +2,17 @@ package com.felipe.fileuploader.tos;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.felipe.fileuploader.enums.StatusUpload;
+
 @XmlRootElement
 public class FileInfoTo implements To {
 	
 	private String id;
 	private String name;
 	private String owner;
-	private Integer chunkNumber;
-	private String status;
-	private Long finalTimestamp;
+	private Integer numberOfChunks;
+	private StatusUpload status;
+	private Long minutesSpent;
 
 	public String getId() {
 		return id;
@@ -36,28 +38,27 @@ public class FileInfoTo implements To {
 		this.owner = owner;
 	}
 
-	public Integer getChunkNumber() {
-		return chunkNumber;
+	public Integer getNumberOfChunks() {
+		return numberOfChunks;
 	}
 
-	public void setChunkNumber(Integer chunkNumber) {
-		this.chunkNumber = chunkNumber;
+	public void setNumberOfChunks(Integer numberOfChunks) {
+		this.numberOfChunks = numberOfChunks;
 	}
 
-	public String getStatus() {
+	public StatusUpload getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(StatusUpload status) {
 		this.status = status;
 	}
 
-	public Long getFinalTimestamp() {
-		return finalTimestamp;
+	public Long getMinutesSpent() {
+		return minutesSpent;
 	}
 
-	public void setFinalTimestamp(Long finalTimestamp) {
-		this.finalTimestamp = finalTimestamp;
+	public void setMinutesSpent(Long minutesSpent) {
+		this.minutesSpent = minutesSpent;
 	}
-
 }

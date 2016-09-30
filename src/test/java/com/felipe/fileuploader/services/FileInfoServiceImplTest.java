@@ -72,7 +72,7 @@ public class FileInfoServiceImplTest {
 				infoFetched,
 				allOf(hasProperty("id", equalTo(id)),
 						hasProperty("owner", equalTo(owner)),
-						hasProperty("status", equalTo(expectedStatus.name()))));
+						hasProperty("status", equalTo(expectedStatus))));
 	}
 	
 	@Test
@@ -101,7 +101,7 @@ public class FileInfoServiceImplTest {
 		info.setId(id);
 		info.setOwner(owner);
 		info.setInitTimestamp(initTimestamp);
-		info.setStatus(status.name());
+		info.setStatus(status);
 
 		return info;
 	}

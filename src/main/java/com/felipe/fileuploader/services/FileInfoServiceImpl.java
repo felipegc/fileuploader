@@ -1,6 +1,7 @@
 package com.felipe.fileuploader.services;
 
 import java.util.List;
+import java.util.Map;
 
 import com.felipe.fileuploader.daos.FileInfoDao;
 import com.felipe.fileuploader.daos.FileInfoDaoImpl;
@@ -16,14 +17,14 @@ public class FileInfoServiceImpl extends
 	}
 
 	public FileInfo saveFileInformation(String owner, String name,
-			Integer chunkNumber, Integer chunksExpected, Long initTimestamp,
+			Integer chunkNumber, Integer chunksExpected, StatusUpload status, Long initTimestamp,
 			Long finalTimestamp) {
 		FileInfo info = new FileInfo();
 		info.setId(owner + name);
 		info.setName(name);
 		info.setOwner(owner);
-		info.setStatus(chunkNumber == chunksExpected ? StatusUpload.FINISHED
-				.name() : StatusUpload.PROGRESS.name());
+		info.setStatus(!StatusUpload.FAILED.equals(status) 
+				&& chunkNumber == chunksExpected ? StatusUpload.FINISHED : status);
 		info.setChunkNumber(chunkNumber);
 		info.setInitTimestamp(initTimestamp);
 		info.setFinalTimestamp(finalTimestamp);
@@ -34,7 +35,12 @@ public class FileInfoServiceImpl extends
 	}
 
 	@Override
-	public List<FileInfo> retrieveAllInfoChunksByOwnerName(String owner, String name) {
+	public List<FileInfo> retrieveAllInfoChunksByOwnerName(String owner,
+			String name) {
 		return dao.findChunksInfoByOwnerName(owner, name);
+	}
+	
+	public Map<String,List<FileInfo>> listAllChunkInfo(){
+		return dao.listAllChunkInfoOrganizedById();
 	}
 }

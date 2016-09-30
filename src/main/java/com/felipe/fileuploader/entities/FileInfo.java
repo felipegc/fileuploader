@@ -1,5 +1,7 @@
 package com.felipe.fileuploader.entities;
 
+import com.felipe.fileuploader.enums.StatusUpload;
+
 
 public class FileInfo extends Entity<String>{
 
@@ -7,7 +9,7 @@ public class FileInfo extends Entity<String>{
 	private String name;
 	private String url;
 	private String owner;
-	private String status;
+	private StatusUpload status;
 	private Integer chunkNumber;
 	private Long initTimestamp;
 	private Long finalTimestamp;
@@ -49,12 +51,12 @@ public class FileInfo extends Entity<String>{
 	public void setOwner(String owner) {
 		this.owner = owner;
 	}
-	
-	public String getStatus() {
+
+	public StatusUpload getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(StatusUpload status) {
 		this.status = status;
 	}
 
