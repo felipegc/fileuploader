@@ -10,5 +10,5 @@ public interface GenericService<T extends Entity<I>, I extends Serializable> {
 
 	public List<T> findAll();
 
-	public T findById(I id);
+	public T findLastDataSavedById(I id);
 }

@@ -26,7 +26,7 @@ public class GenericServiceImpl<T extends Entity<I>, I extends Serializable, D e
 	}
 
 	@Override
-	public T findById(I id) {
-		return dao.findById(id);
+	public T findLastDataSavedById(I id) {
+		return dao.findLastDataSavedById(id);
 	}
 }

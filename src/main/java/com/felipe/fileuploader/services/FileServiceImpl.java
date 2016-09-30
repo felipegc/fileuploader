@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import com.felipe.fileuploader.entities.FileInfo;
+import com.felipe.fileuploader.enums.StatusUpload;
 import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
 
@@ -23,8 +24,9 @@ public class FileServiceImpl {
 	FileInfoService fileInfoService = new FileInfoServiceImpl();
 
 	// TODO felipegc remove fileDetail
-	public List<FileInfo> uploadFile(Integer chunkNumber, Integer chunksExpected,
-			String owner, String name, InputStream uploadedInputStream,
+	public List<FileInfo> uploadFile(Integer chunkNumber,
+			Integer chunksExpected, String owner, String name,
+			InputStream uploadedInputStream,
 			FormDataContentDisposition fileDetail) {
 
 		try {
@@ -54,8 +56,9 @@ public class FileServiceImpl {
 
 			fileInfoService.saveFileInformation(owner, name, chunkNumber,
 					chunksExpected, initTimestamp, finalTimestamp);
-			
-			return fileInfoService.retrieveAllInfoChunksByOwnerName(owner, name);
+
+			return fileInfoService
+					.retrieveAllInfoChunksByOwnerName(owner, name);
 		} catch (FileNotFoundException ex) {
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.directory_not_found",
@@ -71,6 +74,8 @@ public class FileServiceImpl {
 
 		validateMandatoryFields(chunkNumber, chunksExpected, owner, name,
 				uploadedInputStream);
+		validatePreviousChunk(owner, name);
+		validateSameOwnerName(owner, name, chunkNumber);
 
 	}
 
@@ -102,7 +107,29 @@ public class FileServiceImpl {
 
 		if (field != null) {
 			throw new BadRequestException(AppConfiguration.get(
-					"error.mandatory_field_not_present", field));
+					"bad.mandatory_field_not_present", field));
+		}
+	}
+
+	private void validatePreviousChunk(String owner, String name) {
+		FileInfo lastChunkSaved = fileInfoService.findLastDataSavedById(owner
+				+ name);
+		if (lastChunkSaved != null
+				&& !StatusUpload.PROGRESS.name().equals(
+						lastChunkSaved.getStatus())) {
+			throw new BadRequestException(
+					AppConfiguration.get("bad.previous_chunk_problem"));
+		}
+	}
+
+	private void validateSameOwnerName(String owner, String name,
+			Integer chunkNumber) {
+		FileInfo lastChunkSaved = fileInfoService.findLastDataSavedById(owner
+				+ name);
+		if (lastChunkSaved != null
+				&& chunkNumber <= lastChunkSaved.getChunkNumber()) {
+			throw new BadRequestException(
+					AppConfiguration.get("bad.same_name_owner "));
 		}
 	}
 }

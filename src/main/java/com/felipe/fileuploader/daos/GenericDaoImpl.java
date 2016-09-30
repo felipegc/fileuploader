@@ -85,7 +85,7 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 	}
 
 	@Override
-	public T findById(I id) {
+	public T findLastDataSavedById(I id) {
 		Map<I, T> infos = new HashMap<>();
 
 		FileInputStream fis = null;

@@ -46,7 +46,7 @@ public class FileInfoServiceImplTest {
 		service.save(generateFileInfo(id, owner, initTimestamp,
 				StatusUpload.FINISHED));
 
-		FileInfo infoFetched = service.findById(id);
+		FileInfo infoFetched = service.findLastDataSavedById(id);
 
 		assertThat(
 				infoFetched,
@@ -66,7 +66,7 @@ public class FileInfoServiceImplTest {
 		service.save(generateFileInfo("test1", "unitTest",
 				new Date().getTime(), expectedStatus));
 
-		FileInfo infoFetched = service.findById(id);
+		FileInfo infoFetched = service.findLastDataSavedById(id);
 
 		assertThat(
 				infoFetched,
