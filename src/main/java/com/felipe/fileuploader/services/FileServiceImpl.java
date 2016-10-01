@@ -29,7 +29,8 @@ public class FileServiceImpl {
 
 		Long initTimestamp = new Date().getTime();
 		Long finalTimestamp = null;
-
+		FileOutputStream out = null;
+		
 		try {
 
 			validateUpload(chunkNumber, chunksExpected, owner, name,
@@ -38,7 +39,7 @@ public class FileServiceImpl {
 			String fileLocation = DirUtil.createDirForChunksIfNotExist(owner,
 					name) + name + chunkNumber;
 
-			FileOutputStream out = new FileOutputStream(new File(fileLocation));
+			out = new FileOutputStream(new File(fileLocation));
 			int read = 0;
 			byte[] bytes = new byte[1024];
 			out = new FileOutputStream(new File(fileLocation));
@@ -48,17 +49,11 @@ public class FileServiceImpl {
 				read = uploadedInputStream.read(bytes);
 			}
 			
-			//TODO felipegc colocar no finally
-			out.flush();
-			out.close();
-
 			finalTimestamp = new Date().getTime();
 
 			return fileInfoService.saveFileInformation(owner, name, chunkNumber,
 					chunksExpected, StatusUpload.PROGRESS, initTimestamp,
 					finalTimestamp);
-
-			//return fileInfoService.findLastDataSavedById(owner + name);
 		} catch (FileNotFoundException ex) {
 			fileInfoService.saveFileInformation(owner, name, chunkNumber,
 					chunksExpected, StatusUpload.FAILED, initTimestamp,
@@ -73,6 +68,8 @@ public class FileServiceImpl {
 					new Date().getTime());
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.chunk_not_saved", chunkNumber, name));
+		} finally{
+			DirUtil.freeOSResources(out);
 		}
 	}
 
@@ -82,7 +79,7 @@ public class FileServiceImpl {
 		validateMandatoryFields(chunkNumber, chunksExpected, owner, name,
 				uploadedInputStream);
 		// validatePreviousChunk(owner, name);
-		validateSameOwnerName(owner, name, chunkNumber);
+		validateSameChunkUploaded(owner, name, chunkNumber);
 
 	}
 
@@ -128,7 +125,7 @@ public class FileServiceImpl {
 		}
 	}
 
-	private void validateSameOwnerName(String owner, String name,
+	private void validateSameChunkUploaded(String owner, String name,
 			Integer chunkNumber) {
 		List<FileInfo> retrieveAllInfoChunksByOwnerName = fileInfoService
 				.retrieveAllInfoChunksByOwnerName(owner, name);

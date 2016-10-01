@@ -39,8 +39,6 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 
 		try {
 
-			//List<T> allEntities = findAll();
-
 			if (new File(getDataBasePath()).exists()) {
 				fout = new FileOutputStream(pathBaseName, true);
 				oos = new AppendableObjectOutputStream(fout);
@@ -49,43 +47,13 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 				oos = new ObjectOutputStream(fout);
 			}
 
-			//fout = new FileOutputStream(pathBaseName, true);
-			//oos = new AppendableObjectOutputStream(fout);
-
-			// fout = new FileOutputStream(pathBaseName);
-			// oos = new ObjectOutputStream(fout);
-
-			// for (T previousEntity : allEntities) {
-			// oos.writeObject(previousEntity);
-			// }
-
 			oos.writeObject(entity);
-			// oos.reset();
 		} catch (IOException e) {
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.entity_not_saved", entity.getClass()));
 		} finally {
-			if (fout != null) {
-				try {
-					fout.flush();
-					fout.close();
-				} catch (IOException e) {
-					throw new InternalServerErrorException(
-							AppConfiguration
-									.get("error.internal_error_message"));
-				}
-			}
-
-			if (oos != null) {
-				try {
-					oos.flush();
-					oos.close();
-				} catch (IOException e) {
-					throw new InternalServerErrorException(
-							AppConfiguration
-									.get("error.internal_error_message"));
-				}
-			}
+			DirUtil.freeOSResources(fout);
+			DirUtil.freeOSResources(oos);
 		}
 		return success;
 	}
@@ -102,7 +70,6 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 		ObjectInputStream ois = null;
 
 		try {
-			// TODO felipegc abri um trem aqui
 			fis = new FileInputStream(pathBaseName);
 			ois = new ObjectInputStream(fis);
 			while (true) {
@@ -114,21 +81,8 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 			throw new InternalServerErrorException(
 					AppConfiguration.get("error.entities_not_fetched"));
 		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			if (ois != null) {
-				try {
-					ois.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			DirUtil.freeOSResources(fis);
+			DirUtil.freeOSResources(ois);
 		}
 
 		return entities;
@@ -157,13 +111,7 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.entity_not_fetched", id.toString()));
 		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			DirUtil.freeOSResources(fis);
 		}
 
 		return infos.get(id);

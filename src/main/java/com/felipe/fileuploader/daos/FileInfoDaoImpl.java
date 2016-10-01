@@ -15,6 +15,7 @@ import javax.ws.rs.InternalServerErrorException;
 
 import com.felipe.fileuploader.entities.FileInfo;
 import com.felipe.fileuploader.util.AppConfiguration;
+import com.felipe.fileuploader.util.DirUtil;
 
 public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 		FileInfoDao {
@@ -49,7 +50,6 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 		ObjectInputStream ois = null;
 
 		try {
-			//TODO felipegc abri um aqui tambem 2 PROBLEMA
 			fis = new FileInputStream(getDataBasePath());
 			ois = new ObjectInputStream(fis);
 			
@@ -69,21 +69,8 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.internal_error_message"));
 		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			if (ois != null) {
-				try {
-					ois.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			DirUtil.freeOSResources(fis);
+			DirUtil.freeOSResources(ois);
 		}
 
 		return infos;
