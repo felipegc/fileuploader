@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.felipe.fileuploader.entities.FileInfo;
 import com.felipe.fileuploader.enums.StatusUpload;
-import com.felipe.fileuploader.util.TimeUtil;
 
 public class FileInfoConverter implements ConverterTo<FileInfo, FileInfoTo> {
 

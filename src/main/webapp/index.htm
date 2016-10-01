@@ -24,47 +24,58 @@
 			<nav class="navbar navbar-default">
 			<div class="container">
 				<div class="navbar-header">
-					<a class="navbar-brand" href="/">File Uploader</a>
+					<a class="navbar-brand">File Uploader</a>
 				</div>
-
-				<ul class="nav navbar-nav navbar-right">
-					<li><a href="#"><i class="fa fa-home"></i> Home</a></li>
-				</ul>
 			</div>
 			</nav>
 		</header>
 
         <div class="container">
-
             <div ng-controller="mainController">
-
+                <div ng-if="successUp" class="alert" ng-class="{'alert-success': successUp}">
+                  	File Processed. Update List to check to status. 
+                </div>
+                <div ng-if="errorMessage.length > 0" class="alert" ng-class="{'alert-warning': errorMessage.length > 0}">
+                	{{errorMessage}}
+                </div>
                 <div>
                     <label>What is your name?</label>
                     <input type="text" ng-model="owner" />
                 </div>
-                <div class="alert" ng-class="{'alert-warning': owner.length < numChar, 'alert-danger': owner.length > numChar }" >
-                  <div ng-show="owner.length < numChar">
-                    You must type  5 characters.
-                  </div>
-                  <div ng-show="owner.length > numChar">
-                    You must type 5 characters.
-                  </div>
+                <div>
+                	<input type="file" id="file" name="file"/>
+                	<button ng-click="upload()">Upload File</button>
                 </div>
-                <div ng-if="owner.length === numChar" class="alert" ng-class="{'alert-success': owner.length === numChar}">
-                  You finally typed 5 chars!
+                <div>
+                	<button ng-click="listFiles()">Update List</button>
                 </div>
-                <hr />
-
-                <h1>teste.com/{{ lowercaseowner() }}</h1>
-                <input type="file" id="file" name="file"/>
-                <button ng-click="upload()">Upload</button>
-                <ul>
-                  <div ng-repeat="test in tests">
-                    {{test.name}}
-                  </div>
-                </ul>
-
-
+                <div>
+	                <table class="table table-striped">
+	      				<thead>
+	        				<tr>
+	          					<th>File Name</th>
+	          					<th>File Owner</th>
+	          					<th>Number of Chunks</th>
+	          					<th>Status</th>
+	          					<th>Time Spent</th>
+	          					<th>Download</th>
+	        				</tr>
+	      				</thead>
+	      				<tbody>
+	        				<tr ng-repeat="info in filesInfo">
+	          					<td>{{info.name}}</td>
+	          					<td>{{info.owner}}</td>
+	          					<td>{{info.numberOfChunks}}</td>
+	          					<td>{{info.status}}</td>
+	          					<td>{{info.secondsSpent}}</td>
+	          					<td><a href ng-click="download(info.owner, info.name)">click here</a></td>
+	        				</tr>
+	      				</tbody>
+	    			</table>
+    			</div>
+    			<div>
+    				<a href ng-click="eraseDataBase()">Reset DataBase</a>
+    			</div>
             </div>
 
 		</div>

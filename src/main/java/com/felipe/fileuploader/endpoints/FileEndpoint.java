@@ -28,6 +28,7 @@ import com.felipe.fileuploader.services.FileServiceImpl;
 import com.felipe.fileuploader.tos.ConverterTo;
 import com.felipe.fileuploader.tos.FileInfoConverter;
 import com.felipe.fileuploader.tos.FileInfoTo;
+import com.felipe.fileuploader.tos.ResponseErrorTo;
 import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
 
@@ -59,17 +60,21 @@ public class FileEndpoint {
 			uploadFile = fileService.uploadFile(chunkNumber, chunksExpected,
 					owner, name, uploadedInputStream, fileDetail);
 		} catch (BadRequestException ex) {
-			return Response.status(ex.getResponse().getStatus())
-					.entity(ex.getMessage()).build();
+			return Response
+					.status(ex.getResponse().getStatus())
+					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
+							ex.getMessage())).build();
 		} catch (InternalServerErrorException ex) {
 			return Response.status(ex.getResponse().getStatus())
 					.entity(ex.getMessage()).build();
-		} catch (Exception ex){
-			//Bad code falls here. The external client does not need to know this.
-			return Response.status(500).entity(new String(AppConfiguration.get(
-					"error.internal_error_message"))).build();
+		} catch (Exception ex) {
+			// Bad code falls here. The external client does not need to know
+			// this.
+			return Response
+					.status(500)
+					.entity(new String(AppConfiguration
+							.get("error.internal_error_message"))).build();
 		}
-
 		return Response.status(200).entity(uploadFile).build();
 	}
 
