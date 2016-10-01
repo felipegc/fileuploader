@@ -29,23 +29,26 @@ fileuploader.controller('mainController', ['$scope', '$filter','$http','$timeout
         $scope.stop += chunkSize;
         $scope.aux++;
       }
-      sendChunks(blobs,fileName);
+      var numberOfChunks = blobs.length;
+      sendChunks(blobs,fileName,0,numberOfChunks);
     }
 
-    var sendChunks = function(blobs, fileName){
-      for(i=0; i<blobs.length; i++){
+    var sendChunks = function(blobs, fileName, chunk, numberOfChunks){
+    	if(chunk === numberOfChunks){
+    		return;
+    	}
         var formData = new FormData();
-        formData.append('chunkNumber', i+1);
+        formData.append('chunkNumber', chunk);
         formData.append('chunksExpected', blobs.length);
         formData.append('owner','felipe');
         formData.append('name',fileName);
-        formData.append('file',blobs[i]);
+        formData.append('file',blobs[chunk]);
         $http.post('/fileuploader/rest/files/upload', formData, {headers: {'Content-Type': undefined }})
         .success(function(result){
+        	sendChunks(blobs, fileName, chunk+1, numberOfChunks);
         })
         .error(function(result,status){
         });
-      }
     };
 
     $http.get('/fileuploader/rest/TestService/tests')

@@ -2,22 +2,26 @@ package com.felipe.fileuploader.entities;
 
 import com.felipe.fileuploader.enums.StatusUpload;
 
+public class FileInfo extends Entity<String> implements Comparable {
 
-public class FileInfo extends Entity<String>{
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String id;
 	private String name;
 	private String url;
 	private String owner;
 	private StatusUpload status;
 	private Integer chunkNumber;
+	private Integer amountOfChunks;
 	private Long initTimestamp;
 	private Long finalTimestamp;
 
 	public FileInfo() {
 
 	}
-	
+
 	@Override
 	public String getId() {
 		return id;
@@ -68,6 +72,14 @@ public class FileInfo extends Entity<String>{
 		this.chunkNumber = chunkNumber;
 	}
 
+	public Integer getAmountOfChunks() {
+		return amountOfChunks;
+	}
+
+	public void setAmountOfChunks(Integer amountOfChunks) {
+		this.amountOfChunks = amountOfChunks;
+	}
+
 	public Long getInitTimestamp() {
 		return initTimestamp;
 	}
@@ -82,5 +94,12 @@ public class FileInfo extends Entity<String>{
 
 	public void setFinalTimestamp(Long finalTimestamp) {
 		this.finalTimestamp = finalTimestamp;
+	}
+
+	@Override
+	public int compareTo(Object fileInfo) {
+		Integer compNumber1 = this.getChunkNumber();
+		Integer compNumber2 = ((FileInfo) fileInfo).getChunkNumber();
+		return Integer.compare(compNumber1, compNumber2);
 	}
 }

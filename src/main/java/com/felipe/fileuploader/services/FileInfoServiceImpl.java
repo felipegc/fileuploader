@@ -23,9 +23,9 @@ public class FileInfoServiceImpl extends
 		info.setId(owner + name);
 		info.setName(name);
 		info.setOwner(owner);
-		info.setStatus(!StatusUpload.FAILED.equals(status) 
-				&& chunkNumber == chunksExpected ? StatusUpload.FINISHED : status);
+		info.setStatus(status);
 		info.setChunkNumber(chunkNumber);
+		info.setAmountOfChunks(chunksExpected);
 		info.setInitTimestamp(initTimestamp);
 		info.setFinalTimestamp(finalTimestamp);
 

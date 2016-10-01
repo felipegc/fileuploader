@@ -28,7 +28,13 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 	@Override
 	public List<FileInfo> findChunksInfoByOwnerName(String owner, String name) {
 		String id = owner + name;
-		return listAllChunkInfoOrganizedById().get(id);
+		List<FileInfo> infos = listAllChunkInfoOrganizedById().get(id);
+		
+		if(infos == null){
+			return new ArrayList<>();
+		}
+		
+		return infos;
 	}
 	
 	@Override
@@ -40,13 +46,15 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 		Map<String, List<FileInfo>> infos = new HashMap<>();
 
 		FileInputStream fis = null;
+		ObjectInputStream ois = null;
 
 		try {
+			//TODO felipegc abri um aqui tambem 2 PROBLEMA
 			fis = new FileInputStream(getDataBasePath());
+			ois = new ObjectInputStream(fis);
+			
 			while (true) {
-				ObjectInputStream ois = new ObjectInputStream(fis);
 				FileInfo objRead = (FileInfo) ois.readObject();
-
 				if (infos.get(objRead.getId()) == null) {
 					List<FileInfo> chunks = new LinkedList<>();
 					chunks.add(objRead);
@@ -64,6 +72,14 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 			if (fis != null) {
 				try {
 					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			if (ois != null) {
+				try {
+					ois.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

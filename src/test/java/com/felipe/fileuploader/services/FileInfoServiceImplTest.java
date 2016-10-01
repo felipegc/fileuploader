@@ -13,6 +13,7 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.felipe.fileuploader.daos.FileInfoDaoImpl;
@@ -30,6 +31,7 @@ public class FileInfoServiceImplTest {
 	}
 
 	@Test
+	//@Ignore
 	public void whenSavingFileInfoMustSucceed() {
 		FileInfo info = generateFileInfo("test1", "unitTest",
 				new Date().getTime(), StatusUpload.FINISHED);
@@ -38,6 +40,7 @@ public class FileInfoServiceImplTest {
 	}
 
 	@Test
+	//@Ignore
 	public void whenSearchingByIdMustFetchEntity() {
 		String id = "test1";
 		String owner = "unitTest";
@@ -56,6 +59,7 @@ public class FileInfoServiceImplTest {
 	}
 
 	@Test
+	//@Ignore
 	public void whenSearchingByIdMustFetchTheNewestOne() {
 		String id = "test1";
 		String owner = "unitTest";
@@ -76,6 +80,7 @@ public class FileInfoServiceImplTest {
 	}
 	
 	@Test
+	//@Ignore
 	public void whenRetrievingAllInfoChunksByOwnerNameMustSucceed() {
 		String owner = "felipe";
 		String name = "test.txt";
@@ -93,6 +98,20 @@ public class FileInfoServiceImplTest {
 		        Matchers.<FileInfo>hasItem(
 		            Matchers.hasProperty("id", Matchers.equalTo(id))));
 		assertThat(chunkInfos.size(), is(equalTo(2)));
+	}
+	
+	@Test
+	public void test() {
+		for(int i =0; i< 250; i++){
+			String owner = "felipe";
+			String name = "test.txt";
+			String id = owner + name;
+			service.save(generateFileInfo(id, owner,
+					new Date().getTime(), StatusUpload.PROGRESS));
+		}
+		
+		List<FileInfo> chunkInfos = service.retrieveAllInfoChunksByOwnerName("felipe", "test.txt");
+
 	}
 
 	private FileInfo generateFileInfo(String id, String owner,

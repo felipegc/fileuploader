@@ -1,19 +1,23 @@
 package com.felipe.fileuploader.endpoints;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -24,6 +28,8 @@ import com.felipe.fileuploader.services.FileServiceImpl;
 import com.felipe.fileuploader.tos.ConverterTo;
 import com.felipe.fileuploader.tos.FileInfoConverter;
 import com.felipe.fileuploader.tos.FileInfoTo;
+import com.felipe.fileuploader.util.AppConfiguration;
+import com.felipe.fileuploader.util.DirUtil;
 
 @Path("/files")
 public class FileEndpoint {
@@ -44,20 +50,27 @@ public class FileEndpoint {
 			@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) {
 
+		FileInfo uploadFile = null;
+
 		try {
 			// if(chunkNumber == 1){
 			// throw new InternalServerErrorException();
 			// }
-			fileService.uploadFile(chunkNumber, chunksExpected, owner, name,
-					uploadedInputStream, fileDetail);
-		} catch (ServerErrorException ex) {
+			uploadFile = fileService.uploadFile(chunkNumber, chunksExpected,
+					owner, name, uploadedInputStream, fileDetail);
+		} catch (BadRequestException ex) {
 			return Response.status(ex.getResponse().getStatus())
 					.entity(ex.getMessage()).build();
+		} catch (InternalServerErrorException ex) {
+			return Response.status(ex.getResponse().getStatus())
+					.entity(ex.getMessage()).build();
+		} catch (Exception ex){
+			//Bad code falls here. The external client does not need to know this.
+			return Response.status(500).entity(new String(AppConfiguration.get(
+					"error.internal_error_message"))).build();
 		}
 
-		String output = "File successfully uploaded";
-
-		return Response.status(200).entity(output).build();
+		return Response.status(200).entity(uploadFile).build();
 	}
 
 	@GET
@@ -75,5 +88,19 @@ public class FileEndpoint {
 		}
 
 		return Response.ok().entity(infosTo).build();
+	}
+
+	@GET
+	@Path("/erase")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response eraseDataBase() {
+		try {
+			FileUtils.cleanDirectory(new File(DirUtil.getDirDataBase()));
+		} catch (IOException e) {
+			Response.status(400)
+					.entity("Could not delete the database. Please try again.")
+					.build();
+		}
+		return Response.ok().build();
 	}
 }

@@ -23,10 +23,8 @@ public class FileServiceImpl {
 
 	FileInfoService fileInfoService = new FileInfoServiceImpl();
 
-	// TODO felipegc remove fileDetail
-	public List<FileInfo> uploadFile(Integer chunkNumber,
-			Integer chunksExpected, String owner, String name,
-			InputStream uploadedInputStream,
+	public synchronized FileInfo uploadFile(Integer chunkNumber, Integer chunksExpected,
+			String owner, String name, InputStream uploadedInputStream,
 			FormDataContentDisposition fileDetail) {
 
 		Long initTimestamp = new Date().getTime();
@@ -49,18 +47,18 @@ public class FileServiceImpl {
 				out.write(bytes, 0, read);
 				read = uploadedInputStream.read(bytes);
 			}
-
+			
+			//TODO felipegc colocar no finally
 			out.flush();
 			out.close();
 
 			finalTimestamp = new Date().getTime();
 
-			fileInfoService.saveFileInformation(owner, name, chunkNumber,
+			return fileInfoService.saveFileInformation(owner, name, chunkNumber,
 					chunksExpected, StatusUpload.PROGRESS, initTimestamp,
 					finalTimestamp);
 
-			return fileInfoService
-					.retrieveAllInfoChunksByOwnerName(owner, name);
+			//return fileInfoService.findLastDataSavedById(owner + name);
 		} catch (FileNotFoundException ex) {
 			fileInfoService.saveFileInformation(owner, name, chunkNumber,
 					chunksExpected, StatusUpload.FAILED, initTimestamp,
@@ -83,8 +81,8 @@ public class FileServiceImpl {
 
 		validateMandatoryFields(chunkNumber, chunksExpected, owner, name,
 				uploadedInputStream);
-		//validatePreviousChunk(owner, name);
-		//validateSameOwnerName(owner, name, chunkNumber);
+		// validatePreviousChunk(owner, name);
+		validateSameOwnerName(owner, name, chunkNumber);
 
 	}
 
@@ -132,12 +130,13 @@ public class FileServiceImpl {
 
 	private void validateSameOwnerName(String owner, String name,
 			Integer chunkNumber) {
-		FileInfo lastChunkSaved = fileInfoService.findLastDataSavedById(owner
-				+ name);
-		if (lastChunkSaved != null
-				&& chunkNumber <= lastChunkSaved.getChunkNumber()) {
-			throw new BadRequestException(
-					AppConfiguration.get("bad.same_name_owner "));
+		List<FileInfo> retrieveAllInfoChunksByOwnerName = fileInfoService
+				.retrieveAllInfoChunksByOwnerName(owner, name);
+		for (FileInfo fileInfo : retrieveAllInfoChunksByOwnerName) {
+			if (fileInfo.getChunkNumber().equals(chunkNumber)) {
+				throw new BadRequestException(
+						AppConfiguration.get("bad.same_chunk_uploaded"));
+			}
 		}
 	}
 }

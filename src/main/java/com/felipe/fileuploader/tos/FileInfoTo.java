@@ -12,7 +12,7 @@ public class FileInfoTo implements To {
 	private String owner;
 	private Integer numberOfChunks;
 	private StatusUpload status;
-	private Long minutesSpent;
+	private Long secondsSpent;
 
 	public String getId() {
 		return id;
@@ -54,11 +54,11 @@ public class FileInfoTo implements To {
 		this.status = status;
 	}
 
-	public Long getMinutesSpent() {
-		return minutesSpent;
+	public Long getSecondsSpent() {
+		return secondsSpent;
 	}
 
-	public void setMinutesSpent(Long minutesSpent) {
-		this.minutesSpent = minutesSpent;
+	public void setSecondsSpent(Long secondsSpent) {
+		this.secondsSpent = secondsSpent;
 	}
 }
