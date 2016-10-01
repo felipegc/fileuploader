@@ -1,9 +1,5 @@
 package com.felipe.fileuploader.tos;
 
-import java.text.Collator;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.felipe.fileuploader.entities.FileInfo;
@@ -43,11 +39,10 @@ public class FileInfoConverter implements ConverterTo<FileInfo, FileInfoTo> {
 	private Long calculateSecondsSpent(List<FileInfo> chunks) {
 		Long secondsSpent = 0L;
 		for (FileInfo chunk : chunks) {
-			Long timeSpent = TimeUtil.extractSecondsFromTimestamps(
-					chunk.getFinalTimestamp(), chunk.getInitTimestamp());
+			Long timeSpent = chunk.getFinalTimestamp() - chunk.getInitTimestamp();
 			secondsSpent += timeSpent;
 		}
 
-		return secondsSpent;
+		return secondsSpent / 1000;
 	}
 }
