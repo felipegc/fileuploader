@@ -26,6 +26,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import com.felipe.fileuploader.entities.FileInfo;
 import com.felipe.fileuploader.services.FileInfoService;
 import com.felipe.fileuploader.services.FileInfoServiceImpl;
+import com.felipe.fileuploader.services.FileService;
 import com.felipe.fileuploader.services.FileServiceImpl;
 import com.felipe.fileuploader.tos.ConverterTo;
 import com.felipe.fileuploader.tos.FileInfoConverter;
@@ -38,7 +39,7 @@ import com.felipe.fileuploader.util.StreamingOutputImpl;
 @Path("/files")
 public class FileEndpoint {
 
-	FileServiceImpl fileService = new FileServiceImpl();
+	FileService fileService = new FileServiceImpl();
 	FileInfoService infoService = new FileInfoServiceImpl();
 	ConverterTo<FileInfo, FileInfoTo> converterTo = new FileInfoConverter();
 
@@ -65,19 +66,56 @@ public class FileEndpoint {
 					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
 							ex.getMessage())).build();
 		} catch (InternalServerErrorException ex) {
-			return Response.status(ex.getResponse().getStatus())
-					.entity(ex.getMessage()).build();
+			return Response
+					.status(ex.getResponse().getStatus())
+					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
+							ex.getMessage())).build();
 		} catch (Exception ex) {
 			// Bad code falls here. The external client does not need to know
 			// this.
 			return Response
 					.status(500)
-					.entity(new String(AppConfiguration
+					.entity(new ResponseErrorTo(500, AppConfiguration
 							.get("error.internal_error_message"))).build();
 		}
 		return Response.status(200).entity(uploadFile).build();
 	}
 
+	@GET
+	@Path("download/{owner}/{fileName}")
+	@Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
+	public Response downloadFile(@PathParam("owner") String owner,
+			@PathParam("fileName") String fileName) {
+
+		StreamingOutput file;
+
+		try {
+			File downloadFile = fileService.downloadFile(owner, fileName);
+			file = new StreamingOutputImpl(downloadFile.getPath());
+		} catch (BadRequestException ex) {
+			return Response
+					.status(ex.getResponse().getStatus())
+					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
+							ex.getMessage())).build();
+		} catch (InternalServerErrorException ex) {
+			return Response
+					.status(ex.getResponse().getStatus())
+					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
+							ex.getMessage())).build();
+		} catch (Exception ex) {
+			// Bad code falls here. The external client does not need to know
+			// this.
+			return Response
+					.status(500)
+					.entity(new ResponseErrorTo(500, AppConfiguration
+							.get("error.internal_error_message"))).build();
+		}
+		return Response
+				.ok(file)
+				.header("Content-Disposition",
+						"attachment; filename=" + fileName).build();
+	}
+	
 	@GET
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -96,47 +134,16 @@ public class FileEndpoint {
 	}
 
 	@GET
-	@Path("download/{owner}/{fileName}")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadFile(@PathParam("owner") String owner, @PathParam("fileName") String fileName){
-		
-		StreamingOutput file;
-		
-		try {
-			File downloadFile = fileService.downloadFile(owner, fileName);
-			file = new StreamingOutputImpl(downloadFile.getPath());
-		} catch (BadRequestException ex) { 
-			//TODO felipeg check if we can send json as response, it might need to put in the list of produces
-			return Response
-					.status(ex.getResponse().getStatus())
-					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
-							ex.getMessage())).build();
-		} catch (InternalServerErrorException ex) {
-			return Response.status(ex.getResponse().getStatus())
-					.entity(ex.getMessage()).build();
-		} catch (Exception ex) {
-			// Bad code falls here. The external client does not need to know
-			// this.
-			return Response
-					.status(500)
-					.entity(AppConfiguration.get("error.internal_error_message")).build();
-		}
-		return Response
-                .ok(file)
-                .header("Content-Disposition","attachment; filename="+fileName)
-                .build();
-	} 
-	
-	@GET
 	@Path("/erase")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response eraseDataBase() {
 		try {
 			FileUtils.cleanDirectory(new File(DirUtil.getDirDataBase()));
 		} catch (IOException e) {
-			Response.status(500)
-					.entity(AppConfiguration.get("error.internal_error_message"))
-					.build();
+			Response
+			.status(500)
+			.entity(new ResponseErrorTo(500, AppConfiguration
+					.get("error.internal_error_message"))).build();
 		}
 		return Response.ok().build();
 	}

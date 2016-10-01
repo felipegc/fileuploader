@@ -57,7 +57,7 @@
 	          					<th>File Owner</th>
 	          					<th>Number of Chunks</th>
 	          					<th>Status</th>
-	          					<th>Time Spent</th>
+	          					<th>Time Spent(sec)</th>
 	          					<th>Download</th>
 	        				</tr>
 	      				</thead>
@@ -68,7 +68,6 @@
 	          					<td>{{info.numberOfChunks}}</td>
 	          					<td>{{info.status}}</td>
 	          					<td>{{info.secondsSpent}}</td>
-	          					<td><a href ng-click="download(info.owner, info.name)">click here</a></td>
 	          					<td><a href="/fileuploader/rest/files/download/{{info.owner}}/{{info.name}}" download>click here</a></td>
 	        				</tr>
 	      				</tbody>

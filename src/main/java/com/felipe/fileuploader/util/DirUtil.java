@@ -17,19 +17,25 @@ public class DirUtil {
 	}
 
 	public static String createDirForChunksIfNotExist(String owner, String name) {
-		String dir = getDirDataBase() + owner + getSlashUsed() + name.split("\\.")[0]
-				+ getSlashUsed();
+		String dir = getDirByOwnerAndFileName(owner, name);
 		if (new File(dir).exists()) {
 			return dir;
 		}
 		new File(dir).mkdirs();
 		return dir;
 	}
-	
-	public static String getSlashUsed(){
+
+	public static String getDirByOwnerAndFileName(String owner, String fileName) {
+		String dir = getDirDataBase() + owner + getSlashUsed()
+				+ fileName.split("\\.")[0] + getSlashUsed();
+		
+		return dir;
+	}
+
+	public static String getSlashUsed() {
 		return "/";
 	}
-	
+
 	public static void freeOSResources(FileOutputStream fout) {
 		if (fout != null) {
 			try {
@@ -53,7 +59,7 @@ public class DirUtil {
 			}
 		}
 	}
-	
+
 	public static void freeOSResources(FileInputStream fis) {
 		if (fis != null) {
 			try {
@@ -63,7 +69,7 @@ public class DirUtil {
 			}
 		}
 	}
-	
+
 	public static void freeOSResources(ObjectInputStream ois) {
 		if (ois != null) {
 			try {
@@ -73,14 +79,15 @@ public class DirUtil {
 			}
 		}
 	}
-	
+
 	public static void freeOSResources(BufferedOutputStream bos) {
 		if (bos != null) {
 			try {
 				bos.flush();
 				bos.close();
 			} catch (IOException e) {
-				//TODO felipegc throw the server error so endpoint will take them at most.
+				// TODO felipegc throw the server error so endpoint will take
+				// them at most.
 				e.printStackTrace();
 			}
 		}

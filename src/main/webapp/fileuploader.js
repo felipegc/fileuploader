@@ -66,16 +66,6 @@ fileuploader.controller('mainController', ['$scope', '$filter','$http','$timeout
         });
     };
     
-//    $scope.download = function(owner, fileName) {
-//    	console.log(fileName);
-//    	$http.get('/fileuploader/rest/files/download/:owner/:fileName', {
-//    		params: {
-//    			owner:owner,
-//    			fileName: fileName
-//    		}
-//    	});
-//    };
-    
     $scope.download = function(owner, fileName) {
     	console.log(fileName);
     	$http.get('/fileuploader/rest/files/download/'+owner+'/'+fileName);

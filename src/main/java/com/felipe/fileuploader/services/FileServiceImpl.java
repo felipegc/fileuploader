@@ -25,12 +25,12 @@ import com.felipe.fileuploader.enums.StatusUpload;
 import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
 
-public class FileServiceImpl {
+public class FileServiceImpl implements FileService{
 
 	FileInfoService fileInfoService = new FileInfoServiceImpl();
 
 	public synchronized FileInfo uploadFile(Integer chunkNumber,
-			Integer chunksExpected, String owner, String name,
+			Integer chunksExpected, String owner, String fileName,
 			InputStream uploadedInputStream,
 			FormDataContentDisposition fileDetail) {
 
@@ -40,29 +40,23 @@ public class FileServiceImpl {
 
 		try {
 
-			validateUpload(chunkNumber, chunksExpected, owner, name,
+			validateUpload(chunkNumber, chunksExpected, owner, fileName,
 					uploadedInputStream);
 
 			String fileLocation = DirUtil.createDirForChunksIfNotExist(owner,
-					name) + name + chunkNumber;
+					fileName) + fileName + chunkNumber;
 
 			out = new FileOutputStream(new File(fileLocation));
-			int read = 0;
-			byte[] bytes = new byte[1024];
-			out = new FileOutputStream(new File(fileLocation));
-			read = uploadedInputStream.read(bytes);
-			while (read != -1) {
-				out.write(bytes, 0, read);
-				read = uploadedInputStream.read(bytes);
-			}
+
+			copyBuffer(uploadedInputStream, out);
 
 			finalTimestamp = new Date().getTime();
 
-			return fileInfoService.saveFileInformation(owner, name,
+			return fileInfoService.saveFileInformation(owner, fileName,
 					chunkNumber, chunksExpected, StatusUpload.PROGRESS,
 					initTimestamp, finalTimestamp);
 		} catch (FileNotFoundException ex) {
-			fileInfoService.saveFileInformation(owner, name, chunkNumber,
+			fileInfoService.saveFileInformation(owner, fileName, chunkNumber,
 					chunksExpected, StatusUpload.FAILED, initTimestamp,
 					new Date().getTime());
 			throw new InternalServerErrorException(AppConfiguration.get(
@@ -70,11 +64,11 @@ public class FileServiceImpl {
 					AppConfiguration.get("files.storage")));
 
 		} catch (IOException e) {
-			fileInfoService.saveFileInformation(owner, name, chunkNumber,
+			fileInfoService.saveFileInformation(owner, fileName, chunkNumber,
 					chunksExpected, StatusUpload.FAILED, initTimestamp,
 					new Date().getTime());
 			throw new InternalServerErrorException(AppConfiguration.get(
-					"error.chunk_not_saved", chunkNumber, name));
+					"error.chunk_not_saved", chunkNumber, fileName));
 		} finally {
 			DirUtil.freeOSResources(out);
 		}
@@ -85,28 +79,30 @@ public class FileServiceImpl {
 		BufferedOutputStream mergingStream = null;
 		File fileMerged = null;
 		try {
-			String fileLocation = DirUtil.createDirForChunksIfNotExist(owner,
-					fileName);
 			List<FileInfo> chunks = fileInfoService
 					.retrieveAllInfoChunksByOwnerName(owner, fileName);
+			
+			validateDownload(chunks);
 
 			Collections.sort(chunks);
 
-			fileMerged = new File(fileLocation + DirUtil.getSlashUsed() 
-					+ chunks.get(0).getName());
+			String chunksDir = DirUtil.getDirByOwnerAndFileName(owner,
+					fileName.split("\\.")[0]);
 
-			mergingStream = new BufferedOutputStream(new FileOutputStream(fileMerged, true));
-			
+			fileMerged = new File(chunksDir + DirUtil.getSlashUsed() + fileName);
+
+			mergingStream = new BufferedOutputStream(new FileOutputStream(
+					fileMerged, true));
+
 			for (FileInfo fileInfo : chunks) {
-				File file = new File(fileLocation + DirUtil.getSlashUsed() + fileInfo.getName()
+				File file = new File(fileMerged.getAbsolutePath()
 						+ fileInfo.getChunkNumber());
-				
 				mergeFile(mergingStream, file);
 			}
-			 
+
 		} catch (FileNotFoundException ex) {
 			throw new InternalServerErrorException(
-					AppConfiguration.get("error.chunk_not_found"));
+					AppConfiguration.get("bad.chunk_not_found"));
 
 		} catch (IOException e) {
 			throw new InternalServerErrorException(AppConfiguration.get(
@@ -114,21 +110,32 @@ public class FileServiceImpl {
 		} finally {
 			IOUtils.closeQuietly(mergingStream);
 		}
-		
+
 		return fileMerged;
 	}
-	
-	private void mergeFile(OutputStream os, File source)
-			throws IOException {
+
+	private void mergeFile(OutputStream os, File source) throws IOException {
 		InputStream is = null;
 		try {
 			is = new BufferedInputStream(new FileInputStream(source));
-			IOUtils.copy(is, os);
+			copyBuffer(is, os);
 		} finally {
 			IOUtils.closeQuietly(is);
 		}
 	}
 
+	private long copyBuffer(InputStream input, OutputStream output)
+			throws IOException {
+		byte[] buffer = new byte[1024 * 4];
+		long count = 0;
+		int n = 0;
+		while ((n = input.read(buffer)) != -1) {
+			output.write(buffer, 0, n);
+			count += n;
+		}
+		return count;
+	}
+	
 	private void validateUpload(Integer chunkNumber, Integer chunksExpected,
 			String owner, String name, InputStream uploadedInputStream) {
 
@@ -136,6 +143,11 @@ public class FileServiceImpl {
 				uploadedInputStream);
 		validateSameChunkUploaded(owner, name, chunkNumber);
 
+	}
+	
+	private void validateDownload(List<FileInfo> infoChunks){
+		validateFileExists(infoChunks);
+		validateIsReadyToDownload(infoChunks);
 	}
 
 	private void validateMandatoryFields(Integer chunkNumber,
@@ -181,5 +193,18 @@ public class FileServiceImpl {
 			}
 		}
 	}
-
+	
+	private void validateFileExists(List<FileInfo> infoChunks) {
+		if (infoChunks.size() == 0) {
+			throw new BadRequestException(
+					AppConfiguration.get("bad.file_not_found"));
+		}
+	}
+	
+	private void validateIsReadyToDownload(List<FileInfo> infoChunks) {
+		if (!(infoChunks.size() == infoChunks.get(0).getAmountOfChunks())) {
+			throw new BadRequestException(
+					AppConfiguration.get("bad.file_is_not_ready_for_download"));
+		}
+	}
 }
