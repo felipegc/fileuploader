@@ -4,9 +4,6 @@ import com.felipe.fileuploader.enums.StatusUpload;
 
 public class FileInfo extends Entity<String> implements Comparable<FileInfo> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private String id;
 	private String name;

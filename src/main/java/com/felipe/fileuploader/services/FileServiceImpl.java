@@ -16,7 +16,6 @@ import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
@@ -24,6 +23,7 @@ import com.felipe.fileuploader.entities.FileInfo;
 import com.felipe.fileuploader.enums.StatusUpload;
 import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
+import com.felipe.fileuploader.util.stream.CloseableUtil;
 
 public class FileServiceImpl implements FileService{
 
@@ -70,7 +70,7 @@ public class FileServiceImpl implements FileService{
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.chunk_not_saved", chunkNumber, fileName));
 		} finally {
-			DirUtil.freeOSResources(out);
+			CloseableUtil.freeOSResources(out);
 		}
 	}
 
@@ -108,7 +108,7 @@ public class FileServiceImpl implements FileService{
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.file_not_merged", fileName));
 		} finally {
-			IOUtils.closeQuietly(mergingStream);
+			CloseableUtil.freeOSResources(mergingStream);
 		}
 
 		return fileMerged;
@@ -120,7 +120,7 @@ public class FileServiceImpl implements FileService{
 			is = new BufferedInputStream(new FileInputStream(source));
 			copyBuffer(is, os);
 		} finally {
-			IOUtils.closeQuietly(is);
+			CloseableUtil.freeOSResources(is);
 		}
 	}
 

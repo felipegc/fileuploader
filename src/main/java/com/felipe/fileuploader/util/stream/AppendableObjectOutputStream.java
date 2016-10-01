@@ -1,4 +1,4 @@
-package com.felipe.fileuploader.util;
+package com.felipe.fileuploader.util.stream;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

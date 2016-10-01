@@ -1,4 +1,4 @@
-package com.felipe.fileuploader.util;
+package com.felipe.fileuploader.util.stream;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,8 +8,6 @@ import java.nio.file.Paths;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.io.IOUtils;
 
 public class StreamingOutputImpl implements StreamingOutput{
 
@@ -28,7 +26,7 @@ public class StreamingOutputImpl implements StreamingOutput{
             byte[] data = Files.readAllBytes(path);
             os.write(data);
 		}finally{
-			IOUtils.closeQuietly(os);
+			CloseableUtil.freeOSResources(os);
 		}
 		
 	}

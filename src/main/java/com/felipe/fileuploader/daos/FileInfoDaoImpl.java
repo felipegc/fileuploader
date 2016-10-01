@@ -15,7 +15,7 @@ import javax.ws.rs.InternalServerErrorException;
 
 import com.felipe.fileuploader.entities.FileInfo;
 import com.felipe.fileuploader.util.AppConfiguration;
-import com.felipe.fileuploader.util.DirUtil;
+import com.felipe.fileuploader.util.stream.CloseableUtil;
 
 public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 		FileInfoDao {
@@ -69,8 +69,8 @@ public class FileInfoDaoImpl extends GenericDaoImpl<FileInfo, String> implements
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.internal_error_message"));
 		} finally {
-			DirUtil.freeOSResources(fis);
-			DirUtil.freeOSResources(ois);
+			CloseableUtil.freeOSResources(fis);
+			CloseableUtil.freeOSResources(ois);
 		}
 
 		return infos;

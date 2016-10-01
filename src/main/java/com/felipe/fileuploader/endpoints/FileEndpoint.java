@@ -34,7 +34,7 @@ import com.felipe.fileuploader.tos.FileInfoTo;
 import com.felipe.fileuploader.tos.ResponseErrorTo;
 import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
-import com.felipe.fileuploader.util.StreamingOutputImpl;
+import com.felipe.fileuploader.util.stream.StreamingOutputImpl;
 
 @Path("/files")
 public class FileEndpoint {

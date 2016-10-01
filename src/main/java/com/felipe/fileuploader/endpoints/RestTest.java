@@ -31,8 +31,6 @@ public class RestTest {
 		tests.add(test);
 		tests.add(test2);
 		
-		//GenericEntity<TestBean> entity = new GenericEntity<TestBean>(test, TestBean.class);
-		
 		return Response.ok().entity(tests).build();
 	}
 }

@@ -18,8 +18,9 @@ import javax.ws.rs.InternalServerErrorException;
 
 import com.felipe.fileuploader.entities.Entity;
 import com.felipe.fileuploader.util.AppConfiguration;
-import com.felipe.fileuploader.util.AppendableObjectOutputStream;
 import com.felipe.fileuploader.util.DirUtil;
+import com.felipe.fileuploader.util.stream.AppendableObjectOutputStream;
+import com.felipe.fileuploader.util.stream.CloseableUtil;
 
 public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 		implements GenericDao<T, I> {
@@ -52,8 +53,8 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.entity_not_saved", entity.getClass()));
 		} finally {
-			DirUtil.freeOSResources(fout);
-			DirUtil.freeOSResources(oos);
+			CloseableUtil.freeOSResources(fout);
+			CloseableUtil.freeOSResources(oos);
 		}
 		return success;
 	}
@@ -81,8 +82,8 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 			throw new InternalServerErrorException(
 					AppConfiguration.get("error.entities_not_fetched"));
 		} finally {
-			DirUtil.freeOSResources(fis);
-			DirUtil.freeOSResources(ois);
+			CloseableUtil.freeOSResources(fis);
+			CloseableUtil.freeOSResources(ois);
 		}
 
 		return entities;
@@ -111,7 +112,7 @@ public class GenericDaoImpl<T extends Entity<I>, I extends Serializable>
 			throw new InternalServerErrorException(AppConfiguration.get(
 					"error.entity_not_fetched", id.toString()));
 		} finally {
-			DirUtil.freeOSResources(fis);
+			CloseableUtil.freeOSResources(fis);
 		}
 
 		return infos.get(id);

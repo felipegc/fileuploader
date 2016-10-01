@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 public class AppConfiguration {
 
-  private static ResourceBundle bundle = ResourceBundle.getBundle("message");
+  private static ResourceBundle bundle = ResourceBundle.getBundle("appsets");
   private static final Logger log = Logger.getLogger(AppConfiguration.class.getName());
 
   public static String get(String messageKey, Object... params) {
