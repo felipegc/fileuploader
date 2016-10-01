@@ -35,10 +35,10 @@ fileuploader.controller('mainController', ['$scope', '$filter','$http','$timeout
       var blobs = [];
 
       while($scope.aux < numberChunks){
-        var blob = file.slice($scope.start, $scope.stop + 1);
+        var blob = file.slice($scope.start, $scope.stop);
         blobs[$scope.aux] = blob;
         $scope.start = $scope.stop;
-        $scope.stop += chunkSize;
+        $scope.stop += chunkSize+1;
         $scope.aux++;
       }
       var numberOfChunks = blobs.length;
@@ -66,16 +66,20 @@ fileuploader.controller('mainController', ['$scope', '$filter','$http','$timeout
         });
     };
     
-    $scope.download = function(test) {
-    	console.log(test);
-    	$http.get('/fileuploader/rest/files/download')
-        .success(function(result){
-          $scope.filesInfo = result;
-        })
-        .error(function(data,status){
-          console.log(data);
-        });
-    }
+//    $scope.download = function(owner, fileName) {
+//    	console.log(fileName);
+//    	$http.get('/fileuploader/rest/files/download/:owner/:fileName', {
+//    		params: {
+//    			owner:owner,
+//    			fileName: fileName
+//    		}
+//    	});
+//    };
+    
+    $scope.download = function(owner, fileName) {
+    	console.log(fileName);
+    	$http.get('/fileuploader/rest/files/download/'+owner+'/'+fileName);
+    };
     
     $scope.eraseDataBase = function() {
     	console.log();

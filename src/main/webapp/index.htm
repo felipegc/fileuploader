@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="en-us" ng-app="fileuploader">
     <head>
         <title>File Uploader App</title>
@@ -69,6 +69,7 @@
 	          					<td>{{info.status}}</td>
 	          					<td>{{info.secondsSpent}}</td>
 	          					<td><a href ng-click="download(info.owner, info.name)">click here</a></td>
+	          					<td><a href="/fileuploader/rest/files/download/{{info.owner}}/{{info.name}}" download>click here</a></td>
 	        				</tr>
 	      				</tbody>
 	    			</table>

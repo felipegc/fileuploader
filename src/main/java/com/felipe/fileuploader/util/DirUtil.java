@@ -1,5 +1,6 @@
 package com.felipe.fileuploader.util;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,15 +17,19 @@ public class DirUtil {
 	}
 
 	public static String createDirForChunksIfNotExist(String owner, String name) {
-		String dir = getDirDataBase() + owner + "/" + name.split("\\.")[0]
-				+ "/";
+		String dir = getDirDataBase() + owner + getSlashUsed() + name.split("\\.")[0]
+				+ getSlashUsed();
 		if (new File(dir).exists()) {
 			return dir;
 		}
 		new File(dir).mkdirs();
 		return dir;
 	}
-
+	
+	public static String getSlashUsed(){
+		return "/";
+	}
+	
 	public static void freeOSResources(FileOutputStream fout) {
 		if (fout != null) {
 			try {
@@ -64,6 +69,18 @@ public class DirUtil {
 			try {
 				ois.close();
 			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void freeOSResources(BufferedOutputStream bos) {
+		if (bos != null) {
+			try {
+				bos.flush();
+				bos.close();
+			} catch (IOException e) {
+				//TODO felipegc throw the server error so endpoint will take them at most.
 				e.printStackTrace();
 			}
 		}

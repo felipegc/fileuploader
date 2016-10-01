@@ -2,7 +2,7 @@ package com.felipe.fileuploader.entities;
 
 import com.felipe.fileuploader.enums.StatusUpload;
 
-public class FileInfo extends Entity<String> implements Comparable {
+public class FileInfo extends Entity<String> implements Comparable<FileInfo> {
 
 	/**
 	 * 
@@ -97,7 +97,7 @@ public class FileInfo extends Entity<String> implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object fileInfo) {
+	public int compareTo(FileInfo fileInfo) {
 		Integer compNumber1 = this.getChunkNumber();
 		Integer compNumber2 = ((FileInfo) fileInfo).getChunkNumber();
 		return Integer.compare(compNumber1, compNumber2);

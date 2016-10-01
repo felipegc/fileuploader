@@ -13,9 +13,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -31,6 +33,7 @@ import com.felipe.fileuploader.tos.FileInfoTo;
 import com.felipe.fileuploader.tos.ResponseErrorTo;
 import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
+import com.felipe.fileuploader.util.StreamingOutputImpl;
 
 @Path("/files")
 public class FileEndpoint {
@@ -54,9 +57,6 @@ public class FileEndpoint {
 		FileInfo uploadFile = null;
 
 		try {
-			// if(chunkNumber == 1){
-			// throw new InternalServerErrorException();
-			// }
 			uploadFile = fileService.uploadFile(chunkNumber, chunksExpected,
 					owner, name, uploadedInputStream, fileDetail);
 		} catch (BadRequestException ex) {
@@ -96,14 +96,46 @@ public class FileEndpoint {
 	}
 
 	@GET
+	@Path("download/{owner}/{fileName}")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadFile(@PathParam("owner") String owner, @PathParam("fileName") String fileName){
+		
+		StreamingOutput file;
+		
+		try {
+			File downloadFile = fileService.downloadFile(owner, fileName);
+			file = new StreamingOutputImpl(downloadFile.getPath());
+		} catch (BadRequestException ex) { 
+			//TODO felipeg check if we can send json as response, it might need to put in the list of produces
+			return Response
+					.status(ex.getResponse().getStatus())
+					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
+							ex.getMessage())).build();
+		} catch (InternalServerErrorException ex) {
+			return Response.status(ex.getResponse().getStatus())
+					.entity(ex.getMessage()).build();
+		} catch (Exception ex) {
+			// Bad code falls here. The external client does not need to know
+			// this.
+			return Response
+					.status(500)
+					.entity(AppConfiguration.get("error.internal_error_message")).build();
+		}
+		return Response
+                .ok(file)
+                .header("Content-Disposition","attachment; filename="+fileName)
+                .build();
+	} 
+	
+	@GET
 	@Path("/erase")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response eraseDataBase() {
 		try {
 			FileUtils.cleanDirectory(new File(DirUtil.getDirDataBase()));
 		} catch (IOException e) {
-			Response.status(400)
-					.entity("Could not delete the database. Please try again.")
+			Response.status(500)
+					.entity(AppConfiguration.get("error.internal_error_message"))
 					.build();
 		}
 		return Response.ok().build();
