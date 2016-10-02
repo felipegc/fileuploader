@@ -71,8 +71,7 @@ public class FileEndpoint {
 					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
 							ex.getMessage())).build();
 		} catch (Exception ex) {
-			// Bad code falls here. The external client does not need to know
-			// this.
+			//The external client does not need to know this.
 			return Response
 					.status(500)
 					.entity(new ResponseErrorTo(500, AppConfiguration
@@ -103,8 +102,7 @@ public class FileEndpoint {
 					.entity(new ResponseErrorTo(ex.getResponse().getStatus(),
 							ex.getMessage())).build();
 		} catch (Exception ex) {
-			// Bad code falls here. The external client does not need to know
-			// this.
+			//The external client does not need to know
 			return Response
 					.status(500)
 					.entity(new ResponseErrorTo(500, AppConfiguration

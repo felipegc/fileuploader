@@ -3,10 +3,13 @@ package com.felipe.fileuploader.tos;
 import java.util.List;
 
 import com.felipe.fileuploader.entities.FileInfo;
-import com.felipe.fileuploader.enums.StatusUpload;
+import com.felipe.fileuploader.services.FileInfoService;
+import com.felipe.fileuploader.services.FileInfoServiceImpl;
 
 public class FileInfoConverter implements ConverterTo<FileInfo, FileInfoTo> {
-
+	
+	FileInfoService infoService = new FileInfoServiceImpl();
+	
 	@Override
 	public FileInfoTo converterFromEntityTo(List<FileInfo> chunks) {
 		FileInfoTo infoTo = new FileInfoTo();
@@ -14,25 +17,10 @@ public class FileInfoConverter implements ConverterTo<FileInfo, FileInfoTo> {
 		infoTo.setNumberOfChunks(chunks.size());
 		infoTo.setName(chunks.get(0).getName());
 		infoTo.setOwner(chunks.get(0).getOwner());
-		infoTo.setStatus(defineStatus(chunks));
+		infoTo.setStatus(infoService.defineStatus(chunks));
 		infoTo.setSecondsSpent(calculateSecondsSpent(chunks));
 
 		return infoTo;
-	}
-
-	private StatusUpload defineStatus(List<FileInfo> chunks) {
-		if (chunks.size() == 0) {
-			return StatusUpload.PROGRESS;
-		} else if (chunks.size() == chunks.get(0).getAmountOfChunks()) {
-			return StatusUpload.FINISHED;
-		} else {
-			for (FileInfo fileInfo : chunks) {
-				if (StatusUpload.FAILED.equals(fileInfo.getStatus())) {
-					return StatusUpload.FAILED;
-				}
-			}
-			return StatusUpload.PROGRESS;
-		}
 	}
 
 	private Long calculateSecondsSpent(List<FileInfo> chunks) {

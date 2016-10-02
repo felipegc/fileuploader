@@ -25,6 +25,6 @@ public class DirUtil {
 	}
 
 	public static String getSlashUsed() {
-		return "/";
+		return File.separator;
 	}
 }

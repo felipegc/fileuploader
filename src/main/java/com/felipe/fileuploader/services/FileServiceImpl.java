@@ -9,8 +9,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.BadRequestException;
@@ -25,7 +29,7 @@ import com.felipe.fileuploader.util.AppConfiguration;
 import com.felipe.fileuploader.util.DirUtil;
 import com.felipe.fileuploader.util.stream.CloseableUtil;
 
-public class FileServiceImpl implements FileService{
+public class FileServiceImpl implements FileService {
 
 	FileInfoService fileInfoService = new FileInfoServiceImpl();
 
@@ -81,7 +85,7 @@ public class FileServiceImpl implements FileService{
 		try {
 			List<FileInfo> chunks = fileInfoService
 					.retrieveAllInfoChunksByOwnerName(owner, fileName);
-			
+
 			validateDownload(chunks);
 
 			Collections.sort(chunks);
@@ -89,14 +93,15 @@ public class FileServiceImpl implements FileService{
 			String chunksDir = DirUtil.getDirByOwnerAndFileName(owner,
 					fileName.split("\\.")[0]);
 
-			fileMerged = new File(chunksDir + DirUtil.getSlashUsed() + fileName);
+			String finalFilePath = chunksDir + fileName;
+			List<File> chunksToBeMerged = buildListChunksToBeMerged(chunks,
+					finalFilePath);
 
+			fileMerged = new File(finalFilePath);
 			mergingStream = new BufferedOutputStream(new FileOutputStream(
-					fileMerged, true));
+					new File(finalFilePath), true));
 
-			for (FileInfo fileInfo : chunks) {
-				File file = new File(fileMerged.getAbsolutePath()
-						+ fileInfo.getChunkNumber());
+			for (File file : chunksToBeMerged) {
 				mergeFile(mergingStream, file);
 			}
 
@@ -112,6 +117,23 @@ public class FileServiceImpl implements FileService{
 		}
 
 		return fileMerged;
+	}
+
+	private List<File> buildListChunksToBeMerged(List<FileInfo> chunks,
+			String fileToBeMerged) throws IOException {
+		List<File> chunkFiles = new LinkedList<>();
+		Path path = Paths.get(fileToBeMerged);
+
+		if (Files.exists(path)) {
+			Files.delete(path);
+			chunkFiles.add(new File(fileToBeMerged));
+		}
+		for (FileInfo fileInfo : chunks) {
+			chunkFiles
+					.add(new File(fileToBeMerged + fileInfo.getChunkNumber()));
+
+		}
+		return chunkFiles;
 	}
 
 	private void mergeFile(OutputStream os, File source) throws IOException {
@@ -135,7 +157,7 @@ public class FileServiceImpl implements FileService{
 		}
 		return count;
 	}
-	
+
 	private void validateUpload(Integer chunkNumber, Integer chunksExpected,
 			String owner, String name, InputStream uploadedInputStream) {
 
@@ -144,10 +166,10 @@ public class FileServiceImpl implements FileService{
 		validateSameChunkUploaded(owner, name, chunkNumber);
 
 	}
-	
-	private void validateDownload(List<FileInfo> infoChunks){
+
+	private void validateDownload(List<FileInfo> infoChunks) {
 		validateFileExists(infoChunks);
-		validateIsReadyToDownload(infoChunks);
+		validateIsReadyForDownload(infoChunks);
 	}
 
 	private void validateMandatoryFields(Integer chunkNumber,
@@ -193,16 +215,17 @@ public class FileServiceImpl implements FileService{
 			}
 		}
 	}
-	
+
 	private void validateFileExists(List<FileInfo> infoChunks) {
 		if (infoChunks.size() == 0) {
 			throw new BadRequestException(
 					AppConfiguration.get("bad.file_not_found"));
 		}
 	}
-	
-	private void validateIsReadyToDownload(List<FileInfo> infoChunks) {
-		if (!(infoChunks.size() == infoChunks.get(0).getAmountOfChunks())) {
+
+	private void validateIsReadyForDownload(List<FileInfo> infoChunks) {
+		if (!StatusUpload.FINISHED.equals(fileInfoService
+				.defineStatus(infoChunks))) {
 			throw new BadRequestException(
 					AppConfiguration.get("bad.file_is_not_ready_for_download"));
 		}

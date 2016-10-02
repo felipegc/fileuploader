@@ -40,7 +40,24 @@ public class FileInfoServiceImpl extends
 		return dao.findChunksInfoByOwnerName(owner, name);
 	}
 	
+	@Override
 	public Map<String,List<FileInfo>> listAllChunkInfo(){
 		return dao.listAllChunkInfoOrganizedById();
+	}
+	
+	@Override
+	public StatusUpload defineStatus(List<FileInfo> chunks) {
+		if (chunks.size() == 0) {
+			return StatusUpload.PROGRESS;
+		} else if (chunks.size() == chunks.get(0).getAmountOfChunks()) {
+			return StatusUpload.FINISHED;
+		} else {
+			for (FileInfo fileInfo : chunks) {
+				if (StatusUpload.FAILED.equals(fileInfo.getStatus())) {
+					return StatusUpload.FAILED;
+				}
+			}
+			return StatusUpload.PROGRESS;
+		}
 	}
 }

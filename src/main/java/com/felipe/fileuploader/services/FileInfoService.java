@@ -15,4 +15,6 @@ public interface FileInfoService extends GenericService<FileInfo, String> {
 	public List<FileInfo> retrieveAllInfoChunksByOwnerName(String owner, String name);
 	
 	public Map<String,List<FileInfo>> listAllChunkInfo();
+	
+	public StatusUpload defineStatus(List<FileInfo> chunks);
 }
