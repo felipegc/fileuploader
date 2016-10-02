@@ -10,7 +10,10 @@ In order to run this app you MUST setup a dir which will serve as database for t
 
 NOTE:
 
-This app were developed using "apache-tomcat-8.0.37" and JDK 7.
+This app were developed using "apache-tomcat-8.0.37" and JDK 7. 
+The URL to have access to the app after deployed is "http://{address:port}/fileuploader". If you deploy it locally you should be able to open the app by typing the following url in your browser: "http://localhost:8080/fileuploader/".
+
+You can have access through the API by using swagger. The URL is under "http://{address:port}/fileuploader/rest/swagger.json". If you deploy locally you can hit the URL as following: "http://localhost:8080/fileuploader/rest/swagger.json" 
 
 
 
